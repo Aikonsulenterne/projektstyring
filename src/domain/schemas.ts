@@ -25,13 +25,17 @@ const nullableId = z.preprocess(
   z.uuid({ message: 'Ugyldigt id.' }).nullable(),
 );
 
+/** NFC so that search and comparison behave the same for text typed on any device. */
+const nfc = (value: string) => value.normalize('NFC');
+
 const title = z
   .string({ message: 'Skriv et navn.' })
   .trim()
   .min(1, 'Skriv et navn.')
-  .max(LIMITS.title, `Højst ${LIMITS.title} tegn.`);
+  .max(LIMITS.title, `Højst ${LIMITS.title} tegn.`)
+  .transform(nfc);
 
-const longText = z.string().max(LIMITS.longText, `Højst ${LIMITS.longText} tegn.`);
+const longText = z.string().max(LIMITS.longText, `Højst ${LIMITS.longText} tegn.`).transform(nfc);
 
 /** Valid calendar date in YYYY-MM-DD. */
 export const dateOnly = z.iso.date({ message: 'Ugyldig dato.' });
@@ -154,7 +158,7 @@ export const projectPatchSchema = z.object({
 export type ProjectPatchInput = z.input<typeof projectPatchSchema>;
 export type ProjectPatchData = z.output<typeof projectPatchSchema>;
 
-const thoughtBody = z.string().trim().min(1, 'Skriv noget først.').max(LIMITS.longText);
+const thoughtBody = z.string().trim().min(1, 'Skriv noget først.').max(LIMITS.longText).transform(nfc);
 
 export const createThoughtSchema = z.object({
   body: thoughtBody,

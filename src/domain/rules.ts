@@ -24,6 +24,9 @@ import type {
   ThoughtPatchData,
 } from './schemas';
 
+/** Just enough of a task to place another task relative to it. */
+export type Ranked = Pick<Task, 'id' | 'sortKey'>;
+
 export interface RuleContext {
   actorId: Id;
   now: string;
@@ -61,7 +64,7 @@ export function assertVersion(entity: { version: number }, expectedVersion: numb
   if (entity.version !== expectedVersion) throw conflict(entity.version, message);
 }
 
-export function lastKey(column: readonly Task[]): string | null {
+export function lastKey(column: readonly Ranked[]): string | null {
   let max: string | null = null;
   for (const task of column) if (max === null || compareRank(task.sortKey, max) > 0) max = task.sortKey;
   return max;
@@ -70,7 +73,7 @@ export function lastKey(column: readonly Task[]): string | null {
 export function buildTask(
   data: CreateTaskData,
   ctx: RuleContext,
-  column: readonly Task[],
+  column: readonly Ranked[],
   extra: { isExample?: boolean } = {},
 ): Task {
   const id = ctx.newId();
@@ -132,7 +135,7 @@ export function applyTaskPatch(
   patch: TaskPatchData,
   ctx: RuleContext,
   refs: ReferenceLookup,
-  targetColumn: (status: TaskStatus) => readonly Task[],
+  targetColumn: (status: TaskStatus) => readonly Ranked[],
 ): TaskPatchResult {
   if (task.archivedAt) throw new DomainError('ARCHIVED', 'Opgaven er arkiveret. Gendan den først.');
   assertVersion(task, patch.expectedVersion, MESSAGES.taskConflict);
@@ -211,7 +214,7 @@ export function applyTaskPatch(
  * Computes the new sort key for a move. `column` is every non-archived task in the
  * target status (including ones hidden by filters), excluding the moved task.
  */
-export function computeMoveKey(column: readonly Task[], input: MoveTaskData): string {
+export function computeMoveKey(column: readonly Ranked[], input: MoveTaskData): string {
   const find = (id: Id | null) => {
     if (id === null) return null;
     const neighbour = column.find((t) => t.id === id);
@@ -242,7 +245,7 @@ export function computeMoveKey(column: readonly Task[], input: MoveTaskData): st
   return rankBetween(lower, upper);
 }
 
-export function applyTaskMove(task: Task, input: MoveTaskData, column: readonly Task[], ctx: RuleContext): Task {
+export function applyTaskMove(task: Task, input: MoveTaskData, column: readonly Ranked[], ctx: RuleContext): Task {
   if (task.archivedAt) throw new DomainError('ARCHIVED', 'Opgaven er arkiveret. Gendan den først.');
   assertVersion(task, input.expectedVersion, MESSAGES.taskConflict);
   const others = column.filter((t) => t.id !== task.id);

@@ -76,7 +76,7 @@ export interface WorkspaceRepository {
 }
 
 /** Follows cursors until the complete matching set is loaded. */
-export async function listAllTasks(repo: WorkspaceRepository, query: TaskQuery): Promise<TaskPage> {
+export async function listAllTasks(repo: Pick<WorkspaceRepository, 'listTasks'>, query: TaskQuery): Promise<TaskPage> {
   const first = await repo.listTasks(query, { limit: 200 });
   const items = [...first.items];
   let cursor = first.nextCursor;
@@ -89,7 +89,7 @@ export async function listAllTasks(repo: WorkspaceRepository, query: TaskQuery):
   return { items, totalMatching: first.totalMatching, nextCursor: null, serverTime: last.serverTime };
 }
 
-export async function listAllThoughts(repo: WorkspaceRepository, query: ThoughtQuery): Promise<ThoughtPage> {
+export async function listAllThoughts(repo: Pick<WorkspaceRepository, 'listThoughts'>, query: ThoughtQuery): Promise<ThoughtPage> {
   const first = await repo.listThoughts(query, { limit: 200 });
   const items = [...first.items];
   let cursor = first.nextCursor;

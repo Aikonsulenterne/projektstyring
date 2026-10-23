@@ -17,7 +17,7 @@ export default defineConfig({
         },
       },
       {
-        resolve: { alias },
+        resolve: { alias: { ...alias, 'server-only': fileURLToPath(new URL('./tests/integration/empty-module.ts', import.meta.url)) } },
         test: {
           name: 'integration',
           include: ['tests/integration/**/*.test.ts'],

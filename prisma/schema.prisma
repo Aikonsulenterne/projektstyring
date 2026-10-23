@@ -1,0 +1,290 @@
+// AI Team Space – shared canonical storage (docs/handoff/07_DATA_MODEL.md).
+//
+// Every workspace record carries workspace_id, and every association is a composite
+// foreign key (workspace_id, <id>), so a task can never point at a project, area or
+// member from another workspace. Nullable associations are unchecked when null.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectPhase {
+  idea
+  explore
+  experiment
+  prove_value
+  pilot
+  scale
+}
+
+enum ProjectLifecycle {
+  active
+  paused
+  completed
+}
+
+enum TaskStatus {
+  open
+  in_progress
+  blocked
+  done
+}
+
+enum Priority {
+  high
+  normal
+  low
+}
+
+enum ThoughtType {
+  idea
+  observation
+  learning
+  decision
+  todo
+}
+
+enum MemberRole {
+  member
+  admin
+}
+
+enum AreaCode {
+  data
+  model
+  adoption
+}
+
+model Workspace {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  direction String   @default("")
+  version   Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  memberships Membership[]
+  areas       Area[]
+  projects    Project[]
+  tasks       Task[]
+  thoughts    Thought[]
+
+  @@map("workspace")
+}
+
+/// Identity key is tenant + subject (Entra tid + oid), never the display name.
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  tenantId        String   @map("tenant_id")
+  externalSubject String   @map("external_subject")
+  displayName     String   @map("display_name")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  memberships Membership[]
+
+  @@unique([tenantId, externalSubject])
+  @@map("app_user")
+}
+
+model Membership {
+  workspaceId String     @map("workspace_id") @db.Uuid
+  userId      String     @map("user_id") @db.Uuid
+  role        MemberRole @default(member)
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  ownedAreas       Area[]
+  ownedProjects    Project[]
+  assignedTasks    Task[]
+  authoredComments Comment[]
+  authoredThoughts Thought[]
+
+  @@id([workspaceId, userId])
+  @@map("membership")
+}
+
+model Area {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  code        AreaCode
+  label       String
+  ownerUserId String?  @map("owner_user_id") @db.Uuid
+
+  workspace Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  owner     Membership? @relation(fields: [workspaceId, ownerUserId], references: [workspaceId, userId], onDelete: Restrict)
+  tasks     Task[]
+  thoughts  Thought[]
+
+  @@unique([workspaceId, code])
+  @@unique([workspaceId, id])
+  @@map("area")
+}
+
+model Project {
+  id          String           @id @default(uuid()) @db.Uuid
+  workspaceId String           @map("workspace_id") @db.Uuid
+  title       String
+  emoji       String?
+  phase       ProjectPhase     @default(idea)
+  lifecycle   ProjectLifecycle @default(active)
+  ownerUserId String?          @map("owner_user_id") @db.Uuid
+  why         String           @default("")
+  goal        String           @default("")
+  nextStep    String           @default("") @map("next_step")
+  learning    String           @default("")
+  isExample   Boolean          @default(false) @map("is_example")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime         @default(now()) @map("updated_at") @db.Timestamptz(3)
+  version     Int              @default(1)
+  archivedAt  DateTime?        @map("archived_at") @db.Timestamptz(3)
+
+  workspace         Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  owner             Membership? @relation(fields: [workspaceId, ownerUserId], references: [workspaceId, userId], onDelete: Restrict)
+  tasks             Task[]
+  thoughts          Thought[]   @relation("ThoughtProject")
+  convertedThoughts Thought[]   @relation("ThoughtConvertedProject")
+
+  @@unique([workspaceId, id])
+  @@index([workspaceId, archivedAt])
+  @@map("project")
+}
+
+model Task {
+  id             String     @id @default(uuid()) @db.Uuid
+  workspaceId    String     @map("workspace_id") @db.Uuid
+  title          String
+  description    String     @default("")
+  projectId      String?    @map("project_id") @db.Uuid
+  areaId         String?    @map("area_id") @db.Uuid
+  assigneeUserId String?    @map("assignee_user_id") @db.Uuid
+  status         TaskStatus @default(open)
+  priority       Priority   @default(normal)
+  dueDate        DateTime?  @map("due_date") @db.Date
+  /// Fractional rank key, compared byte-wise (COLLATE "C" in the migration).
+  sortKey        String     @map("sort_key")
+  isExample      Boolean    @default(false) @map("is_example")
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime   @default(now()) @map("updated_at") @db.Timestamptz(3)
+  version        Int        @default(1)
+  archivedAt     DateTime?  @map("archived_at") @db.Timestamptz(3)
+
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  project   Project?        @relation(fields: [workspaceId, projectId], references: [workspaceId, id], onDelete: Restrict)
+  area      Area?           @relation(fields: [workspaceId, areaId], references: [workspaceId, id], onDelete: Restrict)
+  assignee  Membership?     @relation(fields: [workspaceId, assigneeUserId], references: [workspaceId, userId], onDelete: Restrict)
+  checklist ChecklistItem[]
+  comments  Comment[]
+
+  @@unique([workspaceId, id])
+  @@index([workspaceId, status, archivedAt])
+  @@index([workspaceId, projectId, status, sortKey])
+  @@index([workspaceId, areaId, status, sortKey])
+  @@index([workspaceId, assigneeUserId, dueDate])
+  @@index([workspaceId, updatedAt])
+  @@map("task")
+}
+
+model ChecklistItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  taskId      String   @map("task_id") @db.Uuid
+  text        String
+  done        Boolean  @default(false)
+  position    Int
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  task Task @relation(fields: [workspaceId, taskId], references: [workspaceId, id], onDelete: Restrict)
+
+  @@index([taskId, position])
+  @@map("checklist_item")
+}
+
+model Comment {
+  id               String    @id @default(uuid()) @db.Uuid
+  workspaceId      String    @map("workspace_id") @db.Uuid
+  taskId           String    @map("task_id") @db.Uuid
+  body             String
+  /// From the session, never from the client.
+  authorUserId     String    @map("author_user_id") @db.Uuid
+  /// Client-generated id that makes retried comment appends idempotent.
+  clientMutationId String?   @map("client_mutation_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @default(now()) @map("updated_at") @db.Timestamptz(3)
+  version          Int       @default(1)
+  archivedAt       DateTime? @map("archived_at") @db.Timestamptz(3)
+
+  task   Task       @relation(fields: [workspaceId, taskId], references: [workspaceId, id], onDelete: Restrict)
+  author Membership @relation(fields: [workspaceId, authorUserId], references: [workspaceId, userId], onDelete: Restrict)
+
+  @@unique([taskId, clientMutationId])
+  @@index([taskId, createdAt])
+  @@map("comment")
+}
+
+model Thought {
+  id                 String      @id @default(uuid()) @db.Uuid
+  workspaceId        String      @map("workspace_id") @db.Uuid
+  body               String
+  type               ThoughtType @default(idea)
+  projectId          String?     @map("project_id") @db.Uuid
+  areaId             String?     @map("area_id") @db.Uuid
+  authorUserId       String      @map("author_user_id") @db.Uuid
+  convertedProjectId String?     @map("converted_project_id") @db.Uuid
+  isExample          Boolean     @default(false) @map("is_example")
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime    @default(now()) @map("updated_at") @db.Timestamptz(3)
+  version            Int         @default(1)
+  archivedAt         DateTime?   @map("archived_at") @db.Timestamptz(3)
+
+  workspace        Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Restrict)
+  project          Project?   @relation("ThoughtProject", fields: [workspaceId, projectId], references: [workspaceId, id], onDelete: Restrict)
+  area             Area?      @relation(fields: [workspaceId, areaId], references: [workspaceId, id], onDelete: Restrict)
+  author           Membership @relation(fields: [workspaceId, authorUserId], references: [workspaceId, userId], onDelete: Restrict)
+  convertedProject Project?   @relation("ThoughtConvertedProject", fields: [workspaceId, convertedProjectId], references: [workspaceId, id], onDelete: Restrict)
+
+  @@index([workspaceId, createdAt])
+  @@map("thought")
+}
+
+/// Minimal audit trail. No comment or task text is copied here.
+model ActivityEvent {
+  id            String   @id @default(uuid()) @db.Uuid
+  workspaceId   String   @map("workspace_id") @db.Uuid
+  actorUserId   String   @map("actor_user_id") @db.Uuid
+  entityType    String   @map("entity_type")
+  entityId      String   @map("entity_id") @db.Uuid
+  action        String
+  changedFields String[] @map("changed_fields")
+  requestId     String   @map("request_id")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([workspaceId, createdAt])
+  @@map("activity_event")
+}
+
+model IdempotencyReceipt {
+  workspaceId String   @map("workspace_id") @db.Uuid
+  actorUserId String   @map("actor_user_id") @db.Uuid
+  key         String
+  requestHash String   @map("request_hash")
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// Retention is a proposal (7 days) awaiting organisational approval.
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(3)
+
+  @@id([workspaceId, actorUserId, key])
+  @@index([expiresAt])
+  @@map("idempotency_receipt")
+}
