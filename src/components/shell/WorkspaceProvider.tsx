@@ -58,6 +58,14 @@ function readDemoUser(): Id {
   }
 }
 
+function createRuntime(session: SessionInfo): Pick<WorkspaceRuntime, 'repo' | 'demo' | 'demoLoadState'> {
+  if (session.mode === 'server') {
+    return { repo: new HttpRepository(session.workspaceId!), demo: null, demoLoadState: null };
+  }
+  const demo = new DemoRepository({ storage: safeStorage(), currentUserId: () => readDemoUser() });
+  return { repo: demo, demo, demoLoadState: demo.init() };
+}
+
 export function WorkspaceProvider({ session, children }: { session: SessionInfo; children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -75,30 +83,17 @@ export function WorkspaceProvider({ session, children }: { session: SessionInfo;
         },
       }),
   );
-  const [demoUser, setDemoUserState] = useState<Id>(DEFAULT_DEMO_USER);
-  const [generation, setGeneration] = useState(0);
-  const [runtime, setRuntime] = useState<Pick<WorkspaceRuntime, 'repo' | 'demo' | 'demoLoadState'> | null>(null);
-
-  // Created after mount: browser storage does not exist during server rendering.
-  useEffect(() => {
-    if (session.mode === 'server') {
-      setRuntime({ repo: new HttpRepository(session.workspaceId!), demo: null, demoLoadState: null });
-      return;
-    }
-    const demo = new DemoRepository({ storage: safeStorage(), currentUserId: () => readDemoUser() });
-    const demoLoadState = demo.init();
-    setDemoUserState(readDemoUser());
-    setRuntime({ repo: demo, demo, demoLoadState });
-  }, [session.mode, session.workspaceId, generation]);
+  // This provider only renders in the browser (see WorkspaceAppLoader), so storage is readable here.
+  const [demoUser, setDemoUserState] = useState<Id>(() => readDemoUser());
+  const [runtime, setRuntime] = useState(() => createRuntime(session));
 
   useEffect(() => {
-    if (!runtime?.demo) return;
+    if (!runtime.demo) return;
     // Another tab changed the demo data: refetch, never touch open drafts.
     return runtime.demo.subscribe(() => void queryClient.invalidateQueries());
   }, [runtime, queryClient]);
 
-  const value = useMemo<WorkspaceRuntime | null>(() => {
-    if (!runtime) return null;
+  const value = useMemo<WorkspaceRuntime>(() => {
     return {
       ...runtime,
       session,
@@ -112,17 +107,13 @@ export function WorkspaceProvider({ session, children }: { session: SessionInfo;
         void queryClient.invalidateQueries();
       },
       reloadDemo: () => {
-        setGeneration((g) => g + 1);
         queryClient.clear();
+        setRuntime(createRuntime(session));
       },
     };
     // demoUser is read through the repository; included to refresh consumers.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runtime, session, queryClient, demoUser]);
-
-  if (!value) {
-    return <div className="min-h-screen bg-bg" aria-busy="true" />;
-  }
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -21,6 +21,8 @@ interface PanelApi {
   closeTask: () => void;
   /** Editors register so navigation can ask Gem / Kassér / Bliv. */
   registerEditor: (editor: DirtyEditor | null) => void;
+  /** The element that opened the task panel, for focus return. */
+  taskOpener: () => HTMLElement | null;
   /** Runs `go` immediately, or after the user resolves unsaved changes. */
   guard: (go: () => void) => void;
   navigate: (href: string) => void;
@@ -39,6 +41,11 @@ export function PanelProvider({ children }: { children: ReactNode }) {
   const { params, set } = useQueryParams();
   const [newTaskDefaults, setNewTaskDefaults] = useState<NewTaskDefaults>({});
   const editor = useRef<DirtyEditor | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  const rememberOpener = () => {
+    const active = document.activeElement;
+    opener.current = active instanceof HTMLElement && active !== document.body ? active : null;
+  };
   const [pending, setPending] = useState<(() => void) | null>(null);
 
   const taskParam = params.get('task');
@@ -52,16 +59,22 @@ export function PanelProvider({ children }: { children: ReactNode }) {
     () => ({
       taskParam,
       newTaskDefaults,
-      openTask: (id) => guard(() => set({ task: id })),
-      openNewTask: (defaults = {}) =>
+      openTask: (id) => {
+        rememberOpener();
+        guard(() => set({ task: id }));
+      },
+      openNewTask: (defaults = {}) => {
+        rememberOpener();
         guard(() => {
           setNewTaskDefaults(defaults);
           set({ task: 'new' });
-        }),
+        });
+      },
       closeTask: () => set({ task: null }),
       registerEditor: (next) => {
         editor.current = next;
       },
+      taskOpener: () => (opener.current && document.contains(opener.current) ? opener.current : null),
       guard,
       navigate: (href) => guard(() => router.push(href)),
     }),

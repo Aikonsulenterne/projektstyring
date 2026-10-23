@@ -13,3 +13,4 @@ next-env.d.ts
 /blob-report/
 /.pgdata/
 /.pg-test/
+/docs/screenshots/*.tmp

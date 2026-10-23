@@ -36,13 +36,13 @@ export function TaskBoard({ tasks, lookups, hideProject }: { tasks: Task[]; look
       const others = column.filter((t) => t.id !== task.id);
       const target = direction === 'up' ? index - 1 : index + 1;
       if (target < 0 || target > others.length) return;
-      void move(task, task.status, neighboursAt(others, target), previous).then(() => refocus(task.id));
+      void move(task, task.status, neighboursAt(others, target), previous).then(() => refocus(task.id, task.status));
       return;
     }
     const statusIndex = TASK_STATUSES.indexOf(task.status) + (direction === 'left' ? -1 : 1);
     const status = TASK_STATUSES[statusIndex];
     if (!status) return;
-    void move(task, status, { beforeTaskId: null, afterTaskId: null }, previous).then(() => refocus(task.id));
+    void move(task, status, { beforeTaskId: null, afterTaskId: null }, previous).then(() => refocus(task.id, status));
   };
 
   const onDragOver = (status: TaskStatus) => (event: DragEvent<HTMLUListElement>) => {
@@ -129,8 +129,11 @@ export function TaskBoard({ tasks, lookups, hideProject }: { tasks: Task[]; look
   );
 }
 
-function refocus(taskId: string) {
+/** Keeps keyboard focus on the moved card once it is rendered in its column. */
+function refocus(taskId: string, status: TaskStatus, attempts = 30) {
   requestAnimationFrame(() => {
-    document.querySelector<HTMLElement>(`[data-task-id="${taskId}"] button`)?.focus();
+    const button = document.querySelector<HTMLElement>(`#col-${status}`)?.closest('section')?.querySelector<HTMLElement>(`[data-task-id="${taskId}"] button`);
+    if (button) button.focus();
+    else if (attempts > 0) refocus(taskId, status, attempts - 1);
   });
 }

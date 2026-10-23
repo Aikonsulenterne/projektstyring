@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import type { ReactNode } from 'react';
-import { WorkspaceApp } from '@/components/shell/WorkspaceApp';
+import { WorkspaceAppLoader as WorkspaceApp } from '@/components/shell/WorkspaceAppLoader';
 import { GateScreen } from '@/components/shell/GateScreen';
 import { getAppConfig } from '@/server/config';
 import { resolveActor } from '@/server/session';

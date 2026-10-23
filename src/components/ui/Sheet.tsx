@@ -19,6 +19,8 @@ export interface SheetProps {
   children: ReactNode;
   /** Exposes the guarded close so footers can wire "Annuller" to it. */
   closeRef?: React.RefObject<(() => void) | null>;
+  /** Element to refocus after closing when the opener is known by the caller. */
+  returnFocusTo?: () => HTMLElement | null;
 }
 
 /**
@@ -26,18 +28,17 @@ export interface SheetProps {
  * actual close. Closing with unsaved changes asks Gem / Kassér / Bliv; the backdrop
  * never discards silently.
  */
-export function Sheet({ open, title, description, isDirty, onSave, onClose, footer, children, closeRef }: SheetProps) {
+export function Sheet({ open, title, description, isDirty, onSave, onClose, footer, children, closeRef, returnFocusTo }: SheetProps) {
   const [confirming, setConfirming] = useState(false);
   const [saving, setSaving] = useState(false);
-  const opener = useRef<HTMLElement | null>(null);
+  // Captured on first render, before the dialog's focus trap moves focus inside.
+  const [opener] = useState<HTMLElement | null>(() =>
+    typeof document !== 'undefined' && document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+      ? document.activeElement
+      : null,
+  );
   const stayRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (open && document.activeElement instanceof HTMLElement && document.activeElement !== document.body) {
-      opener.current = document.activeElement;
-    }
-    if (!open) setConfirming(false);
-  }, [open]);
 
   useEffect(() => {
     if (confirming) stayRef.current?.focus();
@@ -73,7 +74,7 @@ export function Sheet({ open, title, description, isDirty, onSave, onClose, foot
             'focus:outline-none',
           )}
           onCloseAutoFocus={(event) => {
-            const target = opener.current;
+            const target = returnFocusTo?.() ?? opener;
             if (target && document.contains(target)) {
               event.preventDefault();
               target.focus();

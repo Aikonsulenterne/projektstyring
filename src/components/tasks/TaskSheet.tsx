@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   PRIORITIES,
   TASK_STATUSES,
@@ -63,12 +63,12 @@ export function TaskSheetHost() {
 
 function TaskSheet({ taskParam, context }: { taskParam: string; context: WorkspaceContext }) {
   const isNew = taskParam === 'new';
-  const { closeTask } = usePanel();
+  const { closeTask, taskOpener } = usePanel();
   const taskQuery = useTask(isNew ? null : taskParam);
 
   if (!isNew && taskQuery.isPending) {
     return (
-      <Sheet open title="Opgave" isDirty={() => false} onSave={async () => true} onClose={closeTask} footer={null}>
+      <Sheet open title="Opgave" returnFocusTo={taskOpener} isDirty={() => false} onSave={async () => true} onClose={closeTask} footer={null}>
         <p className="text-muted" aria-busy="true">
           Henter opgaven…
         </p>
@@ -80,6 +80,7 @@ function TaskSheet({ taskParam, context }: { taskParam: string; context: Workspa
       <Sheet
         open
         title="Opgaven kunne ikke åbnes"
+        returnFocusTo={taskOpener}
         isDirty={() => false}
         onSave={async () => true}
         onClose={closeTask}
@@ -97,7 +98,7 @@ function TaskEditor({ task, context }: { task: Task | null; context: WorkspaceCo
   const queryClient = useQueryClient();
   const run = useMutationRunner();
   const toast = useToast();
-  const { closeTask, newTaskDefaults, registerEditor } = usePanel();
+  const { closeTask, newTaskDefaults, registerEditor, taskOpener } = usePanel();
   const projectsQuery = useProjects({ includeArchived: true });
   const storageKey = task ? task.id : 'new';
 
@@ -112,7 +113,11 @@ function TaskEditor({ task, context }: { task: Task | null; context: WorkspaceCo
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [conflict, setConflict] = useState<Task | null>(null);
   const [showDetails, setShowDetails] = useState(task !== null);
-  const [recovered, setRecovered] = useState<TaskDraft | null>(null);
+  // Offer a draft left behind by an earlier navigation, never apply it silently.
+  const [recovered, setRecovered] = useState<TaskDraft | null>(() => {
+    const stored = readStoredDraft(storageKey);
+    return stored && isDraftDirty(stored, original) ? stored : null;
+  });
   const idempotencyKey = useRef(newId());
   const titleRef = useRef<HTMLInputElement>(null);
   const savingRef = useRef(false);
@@ -126,14 +131,9 @@ function TaskEditor({ task, context }: { task: Task | null; context: WorkspaceCo
 
   const dirty = isDraftDirty(draft, original);
   const dirtyRef = useRef(dirty);
-  dirtyRef.current = dirty;
-
-  // Offer a draft left behind by an earlier navigation, never apply it silently.
-  useEffect(() => {
-    const stored = readStoredDraft(storageKey);
-    if (stored && isDraftDirty(stored, original)) setRecovered(stored);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useLayoutEffect(() => {
+    dirtyRef.current = dirty;
+  }, [dirty]);
 
   useEffect(() => {
     if (dirty) storeDraft(storageKey, draft);
@@ -270,6 +270,7 @@ function TaskEditor({ task, context }: { task: Task | null; context: WorkspaceCo
       onSave={save}
       onClose={discard}
       closeRef={closeRef}
+      returnFocusTo={taskOpener}
       footer={
         <div className="flex flex-col gap-3">
           {error && !conflict ? (
@@ -343,6 +344,13 @@ function TaskEditor({ task, context }: { task: Task | null; context: WorkspaceCo
             aria-invalid={fieldErrors.title ? true : undefined}
             aria-describedby={fieldErrors.title ? `${ids.title}-error` : undefined}
             onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+            onKeyDown={(e) => {
+              // Enter in the name field saves, like a one-field form.
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                void save();
+              }
+            }}
             placeholder="Hvad skal gøres?"
           />
           <FieldError id={`${ids.title}-error`} message={fieldErrors.title} />

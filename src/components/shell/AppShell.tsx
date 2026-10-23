@@ -5,7 +5,7 @@ import { Archive, FolderKanban, Lightbulb, Map as MapIcon, Menu, Moon, Plus, Ref
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { firstName } from '@/domain/labels';
 import { MESSAGES } from '@/domain/errors';
 import { Button, cx } from '@/components/ui/primitives';
@@ -53,10 +53,10 @@ function Brand() {
 }
 
 function ThemeToggle() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  useEffect(() => {
-    setTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
-  }, []);
+  // The shell renders client-only, so the attribute set by the inline script is readable here.
+  const [theme, setTheme] = useState<'dark' | 'light'>(() =>
+    typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light' ? 'light' : 'dark',
+  );
   const toggle = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
