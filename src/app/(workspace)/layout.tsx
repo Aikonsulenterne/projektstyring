@@ -32,6 +32,8 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
     return (
       <GateScreen title="Du har ikke adgang endnu">
         <p>Du er logget ind, men er ikke medlem af arbejdsrummet. Bed en administrator om at tilføje dig.</p>
+        {/* Auth.js sign-out endpoint (an API route, not a page). */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/api/auth/signout" className="mt-3 inline-block text-accent underline">
           Log ud
         </a>

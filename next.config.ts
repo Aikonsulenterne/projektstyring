@@ -13,13 +13,15 @@ const csp = [
   "connect-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  // Sign-in redirects to Microsoft; unverified until a real tenant is configured.
+  "form-action 'self' https://login.microsoftonline.com",
   "frame-ancestors 'none'",
   ...(httpsOnly ? ['upgrade-insecure-requests'] : []),
 ].join('; ');
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // The container build sets NEXT_OUTPUT=standalone; local `next start` uses the default.
+  output: process.env.NEXT_OUTPUT === 'standalone' ? 'standalone' : undefined,
   poweredByHeader: false,
   devIndicators: false,
   reactStrictMode: true,

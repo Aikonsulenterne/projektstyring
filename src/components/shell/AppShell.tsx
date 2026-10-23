@@ -83,6 +83,8 @@ function AccountBlock() {
       <div className="px-3 text-[13px]">
         <p className="text-muted">Logget ind som</p>
         <p className="font-medium">{runtime.session.account?.displayName}</p>
+        {/* Auth.js sign-out endpoint (an API route, not a page). */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/api/auth/signout" className="mt-1 inline-flex min-h-9 items-center text-accent underline-offset-2 hover:underline">
           Log ud
         </a>
