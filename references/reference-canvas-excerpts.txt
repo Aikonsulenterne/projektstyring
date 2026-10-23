@@ -1,0 +1,36 @@
+REFERENCE ONLY: exact selected excerpts from the current React canvas.
+Not a complete React source file. Do not compile this file.
+
+Source label: AI Team Space.page; code/react.
+
+const PEOPLE=['Sune','Sofie B.','Sofie P.','Nicholas'],PHASES=['Idé','Udforsk','Eksperiment','Bevis værdi','Pilot','Skalér'],STATES=['Åben','I gang','Blokeret','Færdig'],TYPES=['Idé','Observation','Læring','Beslutning','To-do'],KEY='ai-team-space-v2';
+
+function load(){try{let d=JSON.parse(localStorage.getItem(KEY));if(d&&Array.isArray(d.projects)&&Array.isArray(d.tasks)&&Array.isArray(d.notes))return d}catch{}return seed}
+
+useEffect(()=>{try{localStorage.setItem(KEY,JSON.stringify(data));setError(false)}catch{setError(true)}},[data]);
+
+const close=()=>{if(modal&&JSON.stringify(draft)!==modal.original&&!window.confirm('Luk uden at gemme ændringer?'))return;setModal(null)};
+
+const matches=t=>(areaFilter==='Alle'||(areaFilter==='Ufordelt'?!t.area:t.area===areaFilter))&&(owner==='Alle'||t.owner===owner)&&(projectFilter==='Alle'||(projectFilter==='Uden projekt'?!t.project:t.project===projectFilter));
+
+Exact project guards present in save and quickSave:
+if(mode==='task'&&!draft.project)return;
+if(!p)return;
+
+Exact quick-create button condition:
+disabled={!quick.trim()||(kind==='Opgave'&&!pid&&!quickProject)}
+
+Exact panel save button condition:
+disabled={!(modal.mode==='note'||modal.mode==='direction'?draft.text:draft.title)?.trim()||(modal.mode==='task'&&!draft.project)}
+
+Navigation entries:
+[['I dag',Sun],['Vores områder',Map],['Projekter',Map],['Tanker',Lightbulb]]
+
+Project tabs:
+['Kanban','Liste','Retning & læring','Noter']
+
+Area cards use this handler, which incorrectly shares state with note type:
+onClick={()=>setType(type===a?'Alle':a)}
+
+Area ownership labels in canvas:
+[['Data','Sofie Ihle'],['Model','Nicholas'],['Adoption','Sofie Rasmussen']]

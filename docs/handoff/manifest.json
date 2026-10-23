@@ -1,0 +1,92 @@
+{
+  "package": "AI Team Space Claude Code handoff",
+  "status": "Specification only; no complete source export; application tests not executed",
+  "markdownCount": 15,
+  "files": [
+    {
+      "name": "01_PRODUCT_AND_SCOPE.md",
+      "bytes": 2535,
+      "sha256": "8c75b0686f9e73fe774d16f671e72f582b99d56a98744d39e27db87b1930abd2"
+    },
+    {
+      "name": "02_SOURCE_OF_TRUTH.md",
+      "bytes": 2765,
+      "sha256": "9bdb5b298172bc4767b55f19418a217658f0515bed660b183a7ee46cb5e4cd3f"
+    },
+    {
+      "name": "03_DESIGN_SYSTEM.md",
+      "bytes": 2892,
+      "sha256": "e9471ea14ceeecee3a0cb76a4042740960c9d0d4f16e7542886127ba4941907b"
+    },
+    {
+      "name": "04_SCREENS_AND_INTERACTIONS.md",
+      "bytes": 4030,
+      "sha256": "db530b110edb53a4db8ce96f776a3c595bcef918f24f03cbc83348c24f7122fe"
+    },
+    {
+      "name": "05_STACK_AND_ARCHITECTURE.md",
+      "bytes": 3491,
+      "sha256": "4e7909534db5ee4b9447adc9eff3ebc97e962f57e329fa9ec0a0944aa79e640a"
+    },
+    {
+      "name": "06_REPOSITORY_AND_SETUP.md",
+      "bytes": 2967,
+      "sha256": "be1cd0eb180ac8134cb584e08fb2bbbe023f8f8b73b5568a8507cc88def9033b"
+    },
+    {
+      "name": "07_DATA_MODEL.md",
+      "bytes": 3912,
+      "sha256": "9c0dad246c75b083143a424dacd4a024f5e2934512c4fdd42f6526347ba17266"
+    },
+    {
+      "name": "08_API_CONTRACTS.md",
+      "bytes": 3493,
+      "sha256": "67bb0f9b95e8ebd389fb564cd5bee9e6c5acd35625b3aaf6d9c2637c9fcdb0d2"
+    },
+    {
+      "name": "09_SECURITY_AND_COLLABORATION.md",
+      "bytes": 2939,
+      "sha256": "073fa3c1161b31829162dd6ebe0fe8c54e200841b2fd8bffd410b0267fa57ec7"
+    },
+    {
+      "name": "10_BUGS_AND_MIGRATION.md",
+      "bytes": 3771,
+      "sha256": "e636bc6bca1c4ab7fdc7c1c1734bd116c119ac63fe79355cee05dd6bbde0b683"
+    },
+    {
+      "name": "11_TESTS_AND_ACCEPTANCE.md",
+      "bytes": 4296,
+      "sha256": "6d4e1485694cc18001edba17cfe256b832d6a7ae9fcb47a65c138c4cca895985"
+    },
+    {
+      "name": "12_DELIVERY_PLAN.md",
+      "bytes": 2361,
+      "sha256": "2b38f9b6410f3a1173c6561e1da5c0f08010f4c86906b0fa4a04bd10666ed5eb"
+    },
+    {
+      "name": "13_COPY_AND_COMPONENTS.md",
+      "bytes": 2613,
+      "sha256": "ecb05df2e7a2a1435e798f7c570f23960386b78ae2135b531ff515c5379cb1c5"
+    },
+    {
+      "name": "CLAUDE.md",
+      "bytes": 2742,
+      "sha256": "ab4d435decbc5564145512b8254fd03fcf1d3cd2a2e647802cdb29d135e6c917"
+    },
+    {
+      "name": "README.md",
+      "bytes": 3032,
+      "sha256": "e38683f6e03460fe4f61d5edbd2440f4ece8d6d40ecc4c3cdea45ab9a2f01690"
+    },
+    {
+      "name": "reference-canvas-excerpts.txt",
+      "bytes": 1862,
+      "sha256": "f40d7ab992208ce22e38644c7264456be563ef4ac6e7b01743859f0ea2d95cc3"
+    },
+    {
+      "name": "reference-screen.png",
+      "bytes": 201643,
+      "sha256": "ca3a9b6309bf496137c0d9211e33cfe3f43c2552a387def209e7527dbdfc7d27"
+    }
+  ]
+}
