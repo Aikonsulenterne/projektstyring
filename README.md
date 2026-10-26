@@ -32,6 +32,8 @@ Production-like local run of the demo: `npm run build && APP_MODE=demo npm start
 2. **Environment Variables:** `APP_MODE` = `demo` for Production and Preview. Without it the app deliberately shows the setup page instead of the demo.
 3. Deploy. Every push then gets its own preview URL.
 
+If the site shows "Teamspace er ikke sat op endnu", `APP_MODE` is missing: add it, then **Redeploy** (environment variables only apply to new builds). `404 DEPLOYMENT_NOT_FOUND` means the opened address has no successful deployment behind it yet – check **Deployments** and use the **Visit** link of a *Ready* build.
+
 Demo mode keeps each visitor's data in their own browser; nothing is shared. Shared mode on Vercel additionally needs a PostgreSQL database (`DATABASE_URL`) and the Entra variables from `.env.example` – see `docs/DEPLOYMENT_GATES.md`.
 
 An optional, manual GitHub Pages workflow also exists (`.github/workflows/pages.yml`, static build via `scripts/prepare-pages.mjs`).
