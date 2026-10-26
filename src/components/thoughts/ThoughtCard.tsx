@@ -7,6 +7,7 @@ import { GuardedLink } from '@/components/shell/AppShell';
 import { useShell } from '@/components/shell/ShellContext';
 import { Button, ExampleTag, Pill } from '@/components/ui/primitives';
 import { useMutationRunner, useProjects, useWorkspaceContext } from '@/lib/queries';
+import { projectHref } from '@/lib/routes';
 
 export function ThoughtCard({ thought }: { thought: Thought }) {
   const context = useWorkspaceContext();
@@ -40,7 +41,7 @@ export function ThoughtCard({ thought }: { thought: Thought }) {
         {project ? <span>Projekt: {project.title}</span> : null}
         {area ? <span>Område: {area.label}</span> : null}
         {converted ? (
-          <GuardedLink href={`/projects/${converted.id}`} className="text-accent underline">
+          <GuardedLink href={projectHref(converted.id)} className="text-accent underline">
             Blev til projektet {converted.title}
           </GuardedLink>
         ) : null}

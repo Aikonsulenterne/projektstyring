@@ -100,6 +100,10 @@ Differences from `references/reference-screen.png` (deliberate unless noted):
 | `APP_MODE` unset, no variables | `/today` shows "Teamspace er ikke sat op endnu" with the missing variable names; `/api/ready` 503; `/api/v1/…` 503 `NOT_CONFIGURED`; `/api/auth/session` 503 |
 | Local DB + placeholder Entra values | `/today` → 307 to `/signin` ("Log ind med Microsoft"); `/api/v1/…` 401; `/api/ready` 200; CSP, `nosniff`, `Referrer-Policy` headers present |
 
+## GitHub Pages static demo (executed 2026-10-26)
+
+`CI=true node scripts/prepare-pages.mjs` + static export build in a throwaway copy after a clean `npm ci`: pass (8 static routes). Served under `/projektstyring/` with a plain static file server and clicked through in Chromium: root redirect to I dag, demo banner, title-only task create, persistence after reload, navigation to all four views, project page via `/projects/view?id=…` including reload of that deep link, active sidebar shortcut, thought → project conversion, direct deep link to `/areas/`, backup export – 12/12 checks passed, no console errors. The GitHub Actions workflow itself has not run yet (Pages must be enabled in the repository settings first).
+
 ## Handoff bugs (10_BUGS_AND_MIGRATION.md) and where they are fixed
 
 | Finding | Fix | Evidence |

@@ -3,7 +3,7 @@
 import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import { Archive, FolderKanban, Lightbulb, Map as MapIcon, Menu, Moon, Plus, RefreshCw, Save, Sun, SunMedium, X } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useMemo, useState, type ReactNode } from 'react';
 import { firstName } from '@/domain/labels';
@@ -13,6 +13,7 @@ import { useProjects, useTasks, useWorkspaceContext } from '@/lib/queries';
 import { usePanel } from './PanelContext';
 import { useShell } from './ShellContext';
 import { useRuntime } from './WorkspaceProvider';
+import { isProjectRoute, projectHref } from '@/lib/routes';
 
 export const NAV = [
   { href: '/today', label: 'I dag', icon: SunMedium },
@@ -135,6 +136,7 @@ function ProjectShortcuts({ onNavigate }: { onNavigate?: () => void }) {
   const projects = useProjects();
   const tasks = useTasks({});
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const me = context.data?.currentUserId;
   const mine = useMemo(() => {
     const list = (projects.data ?? []).filter((p) => p.lifecycle !== 'completed');
@@ -149,8 +151,8 @@ function ProjectShortcuts({ onNavigate }: { onNavigate?: () => void }) {
       ) : (
         <ul>
           {mine.map((p) => {
-            const href = `/projects/${p.id}`;
-            const active = pathname === href;
+            const href = projectHref(p.id);
+            const active = isProjectRoute(pathname, searchParams, p.id);
             return (
               <li key={p.id}>
                 <GuardedLink

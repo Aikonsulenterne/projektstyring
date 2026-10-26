@@ -11,6 +11,7 @@ import { MemberSelect } from '@/components/tasks/TaskSheet';
 import { Sheet } from '@/components/ui/Sheet';
 import { Button, controlClass, cx, FieldError, FieldLabel } from '@/components/ui/primitives';
 import { useMutationRunner } from '@/lib/queries';
+import { projectHref } from '@/lib/routes';
 
 function saveError(error: unknown): { message: string; fields: Record<string, string> } {
   if (isDomainError(error)) {
@@ -70,7 +71,7 @@ export function ProjectSheet({ project, context }: { project: Project | null; co
           { success: 'Projektet er oprettet.', undo: (p, r) => () => r.archiveProject(p.id, p.version), inlineErrors: true },
         );
         shell.close();
-        router.push(`/projects/${created.id}`);
+        router.push(projectHref(created.id));
       } else {
         const patch: ProjectPatchInput = { expectedVersion: project.version };
         const inverse: ProjectPatchInput = { expectedVersion: 0 };
@@ -290,7 +291,7 @@ export function ConvertThoughtDialog({ thought }: { thought: Thought }) {
         inlineErrors: true,
       });
       shell.close();
-      router.push(`/projects/${project.id}`);
+      router.push(projectHref(project.id));
       return true;
     } catch (caught) {
       setError(saveError(caught).message);

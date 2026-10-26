@@ -11,6 +11,7 @@ import { Button, Card, cx, SectionHeading } from '@/components/ui/primitives';
 import { useProjects, useTasks, useWorkspaceContext } from '@/lib/queries';
 import { useTaskFilters } from '@/lib/url-state';
 import { EmptyFilterResult, QueryState } from './common';
+import { projectHref } from '@/lib/routes';
 
 const PREVIEW = 6;
 
@@ -164,7 +165,7 @@ export function TodayView() {
           <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {activeProjects.slice(0, 4).map((p) => (
               <li key={p.id}>
-                <GuardedLink href={`/projects/${p.id}`} className="block h-full rounded-card border border-line bg-surface p-4 hover:bg-raised">
+                <GuardedLink href={projectHref(p.id)} className="block h-full rounded-card border border-line bg-surface p-4 hover:bg-raised">
                   <p className="font-medium">{p.title}</p>
                   <p className="text-[12px] text-muted">{PHASE_LABEL[p.phase]}</p>
                   {p.nextStep ? <p className="mt-2 line-clamp-2 text-[13px]">Næste skridt: {p.nextStep}</p> : null}

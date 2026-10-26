@@ -26,6 +26,15 @@ npm run dev                     # http://localhost:3000
 
 Production-like local run of the demo: `npm run build && APP_MODE=demo npm start`.
 
+## Demo on GitHub Pages
+
+`.github/workflows/pages.yml` publishes the demo as a static site on every push to `main` or `claude/brave-bell-455nnz`:
+`https://aikonsulenterne.github.io/projektstyring/`
+
+- One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**, then re-run the workflow (Actions tab → "Demo på GitHub Pages" → Run workflow).
+- It is demo mode only: each visitor's data stays in their own browser, nothing is shared, and the site is public like the repository.
+- How it works: `scripts/prepare-pages.mjs` (CI only) removes the API and sign-in routes and swaps in a demo-only layout; project pages use `/projects/view?id=…` because static hosting cannot serve dynamic paths. Build: `STATIC_EXPORT=1 NEXT_PUBLIC_STATIC_DEMO=1 PAGES_BASE_PATH=/projektstyring npx next build`.
+
 ## Shared mode locally (PostgreSQL)
 
 ```bash

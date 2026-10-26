@@ -5,12 +5,13 @@ import { LIFECYCLE_LABEL, PHASE_LABEL } from '@/domain/labels';
 import type { ProjectProgress } from '@/domain/selectors';
 import { GuardedLink } from '@/components/shell/AppShell';
 import { ExampleTag, Pill } from '@/components/ui/primitives';
+import { projectHref } from '@/lib/routes';
 
 /** Owner, next step, task completion count and blocked indicator. No value scores. */
 export function ProjectCard({ project, owner, progress }: { project: Project; owner: Member | undefined; progress: ProjectProgress }) {
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
   return (
-    <GuardedLink href={`/projects/${project.id}`} className="block rounded-card border border-line bg-surface p-4 hover:bg-raised">
+    <GuardedLink href={projectHref(project.id)} className="block rounded-card border border-line bg-surface p-4 hover:bg-raised">
       <div className="flex items-start justify-between gap-2">
         <p className="font-semibold leading-snug">
           {project.emoji ? `${project.emoji} ` : ''}

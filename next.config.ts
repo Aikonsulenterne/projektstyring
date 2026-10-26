@@ -19,26 +19,36 @@ const csp = [
   ...(httpsOnly ? ['upgrade-insecure-requests'] : []),
 ].join('; ');
 
-const nextConfig: NextConfig = {
-  // The container build sets NEXT_OUTPUT=standalone; local `next start` uses the default.
-  output: process.env.NEXT_OUTPUT === 'standalone' ? 'standalone' : undefined,
-  poweredByHeader: false,
-  devIndicators: false,
-  reactStrictMode: true,
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          { key: 'Content-Security-Policy', value: csp },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'same-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-          ...(httpsOnly ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }] : []),
-        ],
+// GitHub Pages demo build (scripts/prepare-pages.mjs): static files only, served under
+// /<repo>/, no response headers (Pages cannot set them), demo mode only.
+const staticExport = process.env.STATIC_EXPORT === '1';
+
+const securityHeaders = [
+  { key: 'Content-Security-Policy', value: csp },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'same-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  ...(httpsOnly ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }] : []),
+];
+
+const nextConfig: NextConfig = staticExport
+  ? {
+      output: 'export',
+      basePath: process.env.PAGES_BASE_PATH || undefined,
+      trailingSlash: true,
+      poweredByHeader: false,
+      devIndicators: false,
+      reactStrictMode: true,
+    }
+  : {
+      // The container build sets NEXT_OUTPUT=standalone; local `next start` uses the default.
+      output: process.env.NEXT_OUTPUT === 'standalone' ? 'standalone' : undefined,
+      poweredByHeader: false,
+      devIndicators: false,
+      reactStrictMode: true,
+      async headers() {
+        return [{ source: '/(.*)', headers: securityHeaders }];
       },
-    ];
-  },
-};
+    };
 
 export default nextConfig;
