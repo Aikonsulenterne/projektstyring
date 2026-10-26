@@ -1,10 +1,9 @@
-# Publishes the demo (browser-only data) to GitHub Pages.
-# One-time setup: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# Optional: publishes the demo (browser-only data) to GitHub Pages.
+# Manual only (the demo is hosted on Vercel). To use it: Settings → Pages →
+# Source: "GitHub Actions", then Actions → "Demo på GitHub Pages" → Run workflow.
 name: Demo på GitHub Pages
 
 on:
-  push:
-    branches: [main, claude/brave-bell-455nnz]
   workflow_dispatch:
 
 permissions:
