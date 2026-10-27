@@ -20,11 +20,11 @@ function migrationUrlProblem() {
   } catch {
     return 'DIRECT_URL/DATABASE_URL is not a valid connection string.';
   }
-  if (parsed.port === '6543' || parsed.searchParams.get('pgbouncer') === 'true') {
-    return process.env.DIRECT_URL
-      ? 'DIRECT_URL points at a transaction pooler (port 6543).'
-      : 'DIRECT_URL is not set, so migrations would use DATABASE_URL, a transaction pooler (port 6543).';
-  }
+  // Never print credentials: only which variable, host, port and user name.
+  const seen = `${process.env.DIRECT_URL ? 'DIRECT_URL' : 'DATABASE_URL (DIRECT_URL is not set)'} = ${parsed.username}@${parsed.hostname}:${parsed.port || '5432'}`;
+  if (parsed.port === '6543') return `migrations need port 5432, but ${seen}.`;
+  if (parsed.searchParams.get('pgbouncer') === 'true') return `remove "?pgbouncer=true" from the migration URL (${seen}).`;
+  console.log(`Migration connection: ${seen}`);
   return null;
 }
 
