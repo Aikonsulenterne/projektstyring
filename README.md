@@ -43,8 +43,7 @@ An optional, manual GitHub Pages workflow also exists (`.github/workflows/pages.
 Supabase is plain PostgreSQL, so the schema and migrations are used unchanged.
 
 1. Create a Supabase project (choose an EU region). Supabase → **Connect** shows the connection strings.
-2. Run the migrations once from a trusted machine with the **direct/Session** string (port 5432):
-   `DIRECT_URL='postgresql://…:5432/postgres' npx prisma migrate deploy`
+2. Migrations run automatically: on Vercel, `npm run vercel-build` (`scripts/vercel-build.mjs`) applies them before building, but only for **production** deployments with a database and without `APP_MODE=demo`. Previews never migrate. Manual alternative: `DIRECT_URL='postgresql://…:5432/postgres' npx prisma migrate deploy`.
 3. In Vercel set `DATABASE_URL` to the **Transaction pooler** string (port 6543). The app keeps its connection pool small on Vercel (`DATABASE_POOL_MAX` overrides).
 4. Create the workspace and members with `scripts/admin.ts` (use `DATABASE_URL=<direct string>`).
 
