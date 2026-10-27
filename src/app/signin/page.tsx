@@ -8,7 +8,7 @@ export const metadata = { title: 'Log ind · teamspace.' };
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   await connection();
   const config = getAppConfig();
-  if (config.mode === 'demo') redirect('/today');
+  if (config.mode !== 'server') redirect('/today');
   if (config.missing.length > 0) {
     return (
       <GateScreen title="Login er ikke sat op endnu">

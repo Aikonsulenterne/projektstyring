@@ -108,6 +108,10 @@ Differences from `references/reference-screen.png` (deliberate unless noted):
 
 Migration `20261027090000_enable_row_level_security` applied; `prisma migrate status` up to date and `migrate diff` reports no drift; 12/12 public tables have RLS enabled; integration suite 32/32 passed afterwards. A non-owner role granted `SELECT`/`INSERT` on every table saw 0 of 179 tasks and 0 users and could not insert. **Not tested:** a real Supabase project (connection strings, TLS mode, pooler behaviour).
 
+## Open access mode (executed 2026-10-27)
+
+Owner's decision: shared database, no login (`APP_MODE=open`). Integration: 3 new tests (workspace/people/areas created once with the right owners; person picker resolution and fallback; another workspace refused; one task list shared between people) – suite 35/35. Browser: production build with `APP_MODE=open` against local PostgreSQL 16, two independent browser contexts: opens without login, banner shown, empty real workspace, task created in A visible in B, person switch without login persists across reload, status change in B visible in A after refresh, area owners correct, thoughts shared, no backup panel – 11/11 checks, no page errors; `/api/ready` → `{"status":"ready","mode":"open"}`. Regression after the change: lint, typecheck, unit 62/62, e2e 74/74. **Not tested:** against the real Supabase project from this environment (Vercel/Supabase hosts are not reachable here).
+
 ## Handoff bugs (10_BUGS_AND_MIGRATION.md) and where they are fixed
 
 | Finding | Fix | Evidence |

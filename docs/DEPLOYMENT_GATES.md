@@ -1,5 +1,7 @@
 # Deployment gates – what is not done
 
+**Current live setup (2026-10-27):** Vercel + Supabase in `APP_MODE=open`: shared database, **no login**, by the owner's explicit choice. Anyone with the URL can read and edit; the page is `noindex` and shows a banner. The gates below apply to the authenticated production mode, which remains available for later.
+
 None of the following was configured, provisioned or verified. No cloud resources were created and no invitations were sent.
 
 | Gate | State | What is needed |

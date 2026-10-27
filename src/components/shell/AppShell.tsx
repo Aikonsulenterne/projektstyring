@@ -79,7 +79,7 @@ function ThemeToggle() {
 function AccountBlock() {
   const runtime = useRuntime();
   const context = useWorkspaceContext();
-  if (runtime.session.mode === 'server') {
+  if (runtime.session.mode === 'server' && !runtime.session.open) {
     return (
       <div className="px-3 text-[13px]">
         <p className="text-muted">Logget ind som</p>
@@ -280,6 +280,13 @@ function MobileBar() {
 /** Local-only banner in demo mode; real storage problems only, never seeded. */
 export function WorkspaceBanner() {
   const runtime = useRuntime();
+  if (runtime.session.open) {
+    return (
+      <p className="rounded-control bg-warning px-4 py-2.5 text-[13px] text-on-warning">
+        Åben adgang: alt gemmes fælles, og der er intet login. Alle med linket kan se og rette jeres opgaver.
+      </p>
+    );
+  }
   if (runtime.session.mode !== 'demo') return null;
   return (
     <div className="flex flex-col gap-2">

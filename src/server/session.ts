@@ -31,6 +31,12 @@ async function verifiedIdentity(): Promise<VerifiedIdentity | null> {
  * person's first active membership is used (the app shell).
  */
 export async function resolveActor(workspaceId?: Id): Promise<ActorResolution> {
+  const { getAppConfig } = await import('./config');
+  if (getAppConfig().mode === 'open') {
+    const [{ cookies }, { getDb }, open] = await Promise.all([import('next/headers'), import('./db'), import('./open-mode')]);
+    const person = (await cookies()).get(open.OPEN_PERSON_COOKIE)?.value;
+    return open.resolveOpenActor(getDb(), person, workspaceId);
+  }
   const identity = await verifiedIdentity();
   if (!identity) return { status: 'unauthenticated' };
   if (identity.tenantId !== process.env.ALLOWED_TENANT_ID) return { status: 'forbidden' };

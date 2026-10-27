@@ -29,7 +29,7 @@ Playwright is pinned to 1.56.x to match the pre-installed Chromium in cloud sess
 
 ## Do not
 - Provision cloud resources, send invitations, or guess tenant ids / redirect URLs.
-- Fake a login or let the demo selector authorise anything.
+- Fake a login or let the demo selector authorise anything. Exception, by the owner's explicit decision (2026-10-27): `APP_MODE=open` runs the shared database with no login at all; the person picker is a label, and the UI says on every page that anyone with the link can edit. Do not present open mode as authenticated.
 - Seed example data into a non-local database (`db:seed` refuses without `SEED_TARGET=local`).
 - Overwrite unreadable demo data; recovery is always explicit.
 - Claim test results you did not run. Update `docs/TEST_REPORT.md` with actual outcomes.

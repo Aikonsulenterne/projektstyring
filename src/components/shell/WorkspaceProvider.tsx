@@ -13,10 +13,14 @@ const DEFAULT_DEMO_USER = '00000000-0000-4000-8000-0000000000a4'; // Nicholas, a
 
 export interface SessionInfo {
   mode: AppMode;
-  /** Server mode: the authenticated account. Demo mode: null (no login). */
+  /** Shared database without login (APP_MODE=open). */
+  open?: boolean;
+  /** Server mode: the authenticated account. Demo and open mode: null (no login). */
   account: { displayName: string } | null;
   workspaceId: Id | null;
 }
+
+const OPEN_PERSON_COOKIE = 'teamspace-person';
 
 interface WorkspaceRuntime {
   repo: WorkspaceRepository;
@@ -98,6 +102,12 @@ export function WorkspaceProvider({ session, children }: { session: SessionInfo;
       ...runtime,
       session,
       setDemoUser: (id: Id) => {
+        if (session.open) {
+          // Open mode: the server reads this label cookie. It is not a login.
+          document.cookie = `${OPEN_PERSON_COOKIE}=${encodeURIComponent(id)}; path=/; max-age=31536000; samesite=lax${location.protocol === 'https:' ? '; secure' : ''}`;
+          void queryClient.invalidateQueries();
+          return;
+        }
         try {
           window.localStorage.setItem(DEMO_USER_KEY, id);
         } catch {

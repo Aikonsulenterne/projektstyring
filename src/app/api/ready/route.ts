@@ -9,7 +9,7 @@ export async function GET(): Promise<Response> {
   try {
     const { getDb } = await import('@/server/db');
     await getDb().$queryRaw`SELECT 1`;
-    return Response.json({ status: 'ready', mode: 'server' }, { headers });
+    return Response.json({ status: 'ready', mode: config.mode }, { headers });
   } catch {
     return Response.json({ status: 'database-unavailable' }, { status: 503, headers });
   }

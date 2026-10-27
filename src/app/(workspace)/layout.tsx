@@ -13,6 +13,14 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
   if (config.mode === 'demo') {
     return <WorkspaceApp session={{ mode: 'demo', account: null, workspaceId: null }}>{children}</WorkspaceApp>;
   }
+  if (config.mode === 'open' && config.missing.length === 0) {
+    // Open access: shared database, no login. The banner in the app says so.
+    const resolution = await resolveActor();
+    if (resolution.status !== 'ok') throw new Error('Open workspace could not be prepared');
+    return (
+      <WorkspaceApp session={{ mode: 'server', open: true, account: null, workspaceId: resolution.actor.workspaceId }}>{children}</WorkspaceApp>
+    );
+  }
   if (config.missing.length > 0) {
     return (
       <GateScreen title="Teamspace er ikke sat op endnu">

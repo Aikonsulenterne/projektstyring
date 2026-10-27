@@ -6,11 +6,14 @@ Et enkelt fælles arbejdsrum for Sune, Sofie Ihle, Sofie Rasmussen og Nicholas: 
 
 ## Two modes
 
-| | Demo (`APP_MODE=demo`) | Production (anything else) |
-|---|---|---|
-| Data | This browser only (`localStorage`, key `ai-team-space-v3`) | PostgreSQL, shared |
-| Who am I | "Vis som · ikke login" selector, clearly not a login | Microsoft Entra ID (single tenant) + explicit membership |
-| Missing config | – | Fails closed: setup page, API answers 503. No demo fallback. |
+| | Demo (`APP_MODE=demo`) | Open (`APP_MODE=open`) | Production (anything else) |
+|---|---|---|---|
+| Data | This browser only (`localStorage`, key `ai-team-space-v3`) | PostgreSQL, shared | PostgreSQL, shared |
+| Who am I | "Vis som · ikke login" selector, clearly not a login | "Vis som · ikke login" selector (a cookie label, **not** a login) | Microsoft Entra ID (single tenant) + explicit membership |
+| Who can read/edit | Only this browser | **Anyone with the link** (banner on every page; `noindex`) | Members only |
+| Missing config | – | Setup page if `DATABASE_URL` is missing | Fails closed: setup page, API answers 503. No demo fallback. |
+
+**Open mode is the current live setup**, chosen explicitly by the workspace owner (2026-10-27) instead of a login. It creates one workspace with Sune, Sofie Ihle, Sofie Rasmussen and Nicholas and the three areas (Data → Sofie Ihle, Model → Nicholas, Adoption → Sofie Rasmussen) on first use, without example content. Switching to `production` later keeps the data but needs the login setup in `docs/DEPLOYMENT_GATES.md`.
 
 The two never mix: the demo repository is never used in production, and the API is closed (404) in demo mode.
 
