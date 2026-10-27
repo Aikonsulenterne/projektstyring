@@ -104,6 +104,10 @@ Differences from `references/reference-screen.png` (deliberate unless noted):
 
 `CI=true node scripts/prepare-pages.mjs` + static export build in a throwaway copy after a clean `npm ci`: pass (8 static routes). Served under `/projektstyring/` with a plain static file server and clicked through in Chromium: root redirect to I dag, demo banner, title-only task create, persistence after reload, navigation to all four views, project page via `/projects/view?id=…` including reload of that deep link, active sidebar shortcut, thought → project conversion, direct deep link to `/areas/`, backup export – 12/12 checks passed, no console errors. The GitHub Actions workflow itself has not run yet (Pages must be enabled in the repository settings first).
 
+## Supabase preparation (executed 2026-10-27, local PostgreSQL 16)
+
+Migration `20261027090000_enable_row_level_security` applied; `prisma migrate status` up to date and `migrate diff` reports no drift; 12/12 public tables have RLS enabled; integration suite 32/32 passed afterwards. A non-owner role granted `SELECT`/`INSERT` on every table saw 0 of 179 tasks and 0 users and could not insert. **Not tested:** a real Supabase project (connection strings, TLS mode, pooler behaviour).
+
 ## Handoff bugs (10_BUGS_AND_MIGRATION.md) and where they are fixed
 
 | Finding | Fix | Evidence |

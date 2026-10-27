@@ -10,7 +10,7 @@ None of the following was configured, provisioned or verified. No cloud resource
 | Membership | **Missing** | Each person's verified `tid` + `oid`, added with `scripts/admin.ts add-member`; area owners set with `set-area-owner`; roles approved (member/admin is a proposal) |
 | `AUTH_SECRET`, `APP_BASE_URL` | **Missing** | Generated secret; the real HTTPS base URL |
 | Hosting | **Not chosen** | Proposal: container (`Dockerfile`) on an approved Azure application host. Region, network rules, cost: not decided. The Dockerfile has **not** been built (no Docker daemon in the delivery environment). |
-| Database | **Not provisioned** | Managed PostgreSQL 16+, UTF-8 locale (Danish case-insensitive search depends on it), TLS, backups, PITR |
+| Database | **Not provisioned** | Proposed: Supabase (PostgreSQL), EU region; see README "Database on Supabase". Needs UTF-8 locale, TLS, backups/PITR (PITR is a paid Supabase add-on). Untested against a real Supabase project: the TLS mode of the connection string (`sslmode`) must be confirmed on first connect |
 | Migrations in production | **Not run** | `npm run db:deploy` from a reviewed release |
 | Restore drill | **Not done** | See `BACKUP_RESTORE.md` |
 | Rate limiting (429) | **Not implemented** | Gateway or host feature |

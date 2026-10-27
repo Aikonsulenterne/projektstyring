@@ -5,7 +5,10 @@ import { PrismaClient } from '@/generated/prisma/client';
 export type Db = InstanceType<typeof PrismaClient>;
 
 export function createDb(connectionString: string): Db {
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  // Serverless hosts run many small instances; keep each pool small so a hosted
+  // pooler (e.g. Supabase) is not exhausted. Override with DATABASE_POOL_MAX.
+  const max = Number(process.env.DATABASE_POOL_MAX) || (process.env.VERCEL ? 3 : 10);
+  return new PrismaClient({ adapter: new PrismaPg({ connectionString, max }) });
 }
 
 const globalForDb = globalThis as unknown as { teamspaceDb?: Db };

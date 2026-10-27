@@ -38,6 +38,20 @@ Demo mode keeps each visitor's data in their own browser; nothing is shared. Sha
 
 An optional, manual GitHub Pages workflow also exists (`.github/workflows/pages.yml`, static build via `scripts/prepare-pages.mjs`).
 
+## Database on Supabase
+
+Supabase is plain PostgreSQL, so the schema and migrations are used unchanged.
+
+1. Create a Supabase project (choose an EU region). Supabase → **Connect** shows the connection strings.
+2. Run the migrations once from a trusted machine with the **direct/Session** string (port 5432):
+   `DIRECT_URL='postgresql://…:5432/postgres' npx prisma migrate deploy`
+3. In Vercel set `DATABASE_URL` to the **Transaction pooler** string (port 6543). The app keeps its connection pool small on Vercel (`DATABASE_POOL_MAX` overrides).
+4. Create the workspace and members with `scripts/admin.ts` (use `DATABASE_URL=<direct string>`).
+
+Security: Supabase exposes the `public` schema through its REST API to anyone with the project's public key. Migration `20261027090000_enable_row_level_security` enables row level security on every table without policies, which closes that route; the app connects as the table owner and is unaffected (verified locally: a role granted SELECT/INSERT sees 0 rows and cannot insert). Do not add RLS policies or use the Supabase client in the browser for this data.
+
+The database alone does not make the app shared: production mode also needs a login (`DEPLOYMENT_GATES.md`).
+
 ## Shared mode locally (PostgreSQL)
 
 ```bash
