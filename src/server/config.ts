@@ -25,8 +25,15 @@ export const REQUIRED_SERVER_ENV = [
  *   database configuration is missing. Never a silent fallback to another mode.
  */
 export function getAppConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
-  if (env.APP_MODE === 'demo') return { mode: 'demo' };
-  if (env.APP_MODE === 'open') return { mode: 'open', missing: env.DATABASE_URL?.trim() ? [] : ['DATABASE_URL'] };
+  // Tolerate case and stray whitespace from dashboards ("Open ", "demo\n").
+  const mode = appModeValue(env);
+  if (mode === 'demo') return { mode: 'demo' };
+  if (mode === 'open') return { mode: 'open', missing: env.DATABASE_URL?.trim() ? [] : ['DATABASE_URL'] };
   const missing = REQUIRED_SERVER_ENV.filter((key) => !env[key]?.trim());
   return { mode: 'server', missing };
+}
+
+/** Normalised APP_MODE as configured (lower-case, trimmed); '' when unset. */
+export function appModeValue(env: NodeJS.ProcessEnv = process.env): string {
+  return (env.APP_MODE ?? '').trim().toLowerCase();
 }

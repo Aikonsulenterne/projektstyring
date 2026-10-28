@@ -3,7 +3,7 @@ import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import { WorkspaceAppLoader as WorkspaceApp } from '@/components/shell/WorkspaceAppLoader';
 import { GateScreen } from '@/components/shell/GateScreen';
-import { getAppConfig } from '@/server/config';
+import { appModeValue, getAppConfig } from '@/server/config';
 import { resolveActor } from '@/server/session';
 
 export default async function WorkspaceLayout({ children }: { children: ReactNode }) {
@@ -30,7 +30,12 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
             <li key={key}>{key}</li>
           ))}
         </ul>
-        <p className="mt-3">Der er ingen automatisk demo-reserve. Sæt APP_MODE=demo for at køre den lokale prototype.</p>
+        <p className="mt-3">
+          APP_MODE er lige nu: <code className="font-mono">{appModeValue() ? `"${appModeValue()}"` : 'ikke sat'}</code>.
+        </p>
+        <p className="mt-3">
+          Sæt APP_MODE=open for fælles data uden login, eller APP_MODE=demo for den lokale prototype. Husk at redeploye bagefter.
+        </p>
       </GateScreen>
     );
   }

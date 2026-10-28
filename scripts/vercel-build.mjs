@@ -7,7 +7,7 @@ import { execSync } from 'node:child_process';
 const run = (command) => execSync(command, { stdio: 'inherit' });
 const hasDatabase = Boolean(process.env.DIRECT_URL || process.env.DATABASE_URL);
 const isProduction = process.env.VERCEL_ENV === 'production';
-const isDemo = process.env.APP_MODE === 'demo';
+const isDemo = (process.env.APP_MODE ?? '').trim().toLowerCase() === 'demo';
 
 // Migrations take session-level advisory locks, which a transaction-mode pooler
 // (Supabase port 6543) does not support: `migrate deploy` then hangs until the
